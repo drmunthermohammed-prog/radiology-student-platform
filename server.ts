@@ -65,7 +65,18 @@ async function startServer() {
         }),
       });
 
-      const data = await tgRes.json();
+      let data = await tgRes.json();
+      if (!data.ok) {
+        const plainRes = await fetch(tgUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            chat_id: TELEGRAM_ADMIN_ID,
+            text: text.replace(/[*_`[\]]/g, ''),
+          }),
+        });
+        data = await plainRes.json();
+      }
       res.json({ ok: Boolean(data.ok) });
     } catch (err) {
       console.warn('Server Telegram sendMessage warning:', err);
